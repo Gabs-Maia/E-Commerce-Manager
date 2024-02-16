@@ -5,10 +5,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
+import org.springframework.security.config.annotation.SecurityBuilder;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
@@ -19,7 +21,7 @@ import org.springframework.web.cors.CorsConfiguration;
 @Configuration
 // Enables Spring's Security. Applied to the global Security class.
 @EnableWebSecurity
-public class SecurityConfig implements WebSecurityConfigurerAdapter{
+public class SecurityConfig implements WebSecurityConfigurer{
     
     //Beans injection through matching.
     @Autowired
@@ -27,7 +29,6 @@ public class SecurityConfig implements WebSecurityConfigurerAdapter{
     
     @Autowired
     JwtFilter jwtFilter;
-    //
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception{
         auth.userDetailsService(customerUserDetailsService);
@@ -37,18 +38,28 @@ public class SecurityConfig implements WebSecurityConfigurerAdapter{
     public PasswordEncoder passwordEncoder(){return SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8();}
     
     @Bean(name= BeanIds.AUTHENTICATION_MANAGER)
-    @Override
+    
     public AuthenticationManager authenticationManagerBean() throws Exception{
-        return super.();
+        return super.;
     }
     
     @Override
     protected void configure(HttpSecurity http) throws  Exception{
-        http.cors().configurationSource(request -> new CorsConfiguration().aaplyPermitDefaultValues())
-                .and().csrf().disable().anyMatch("/user/login", "/user/signup", "/user/forgotPassword")
+        http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
+                .and().csrf().disable().requestMatchers("/user/login", "/user/signup", "/user/forgotPassword")
                 .anyRequest().and().exceptionHandling().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     
     http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+    }
+    
+    @Override
+    public void init(SecurityBuilder builder) throws Exception {
+    
+    }
+    
+    @Override
+    public void configure(SecurityBuilder builder) throws Exception {
+    
     }
 }

@@ -8,6 +8,7 @@ import com.inn.cafeman.com.inn.cafeman.constants.CafeConstants;
 import com.inn.cafeman.com.inn.cafeman.dao.UserDao;
 import com.inn.cafeman.com.inn.cafeman.service.UserService;
 import com.inn.cafeman.com.inn.cafeman.utils.CafeUtils;
+import com.inn.cafeman.com.inn.cafeman.wraper.UserWrapper;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -33,6 +33,8 @@ public class UserServiceImpl implements UserService {
     CustomerUsersDetailsService customerUsersDetailsService;
     @Autowired
     JwtUtil jwtUtil;
+    @Autowired
+    JwtFilter jwtFilter;
     @Override
     public ResponseEntity<String> signUp(Map<String, String> requestMap) {
         try {
@@ -98,5 +100,40 @@ public class UserServiceImpl implements UserService {
         }
         return new ResponseEntity<String>("{\"message\":\""+"Bad Credentials."+"\"}",
                 HttpStatus.BAD_REQUEST);
+    }
+    
+    @Override
+    public ResponseEntity<List<UserWrapper>> getAllUser() {
+        try{
+            if(jwtFilter.isAdmin()){
+                return new ResponseEntity<>(userDao.getAllUser(), HttpStatus.OK);
+            }else{
+                return new ResponseEntity<>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
+                
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    @Override
+    public ResponseEntity<String> update(Map<String, String> requestMap) {
+        try{
+           if(jwtFilter.isUser()){
+               Optional<User> optional = userDao.findById(Integer.parseInt(requestMap.get("id")));
+               if (!optional.isEmpty()){
+                   userDao.updateStatus(requestMap.get("status"), Integer.parseInt(requestMap.get("id")));
+                   return CafeUtils.getResponseEntity("User Status Updates Successugully", HttpStatus.OK);
+               }else{
+                   CafeUtils.getResponseEntity("User id doesn't exist!", HttpStatus.OK);
+               }
+           }else{
+               return CafeUtils.getResponseEntity(CafeConstants.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
+           }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

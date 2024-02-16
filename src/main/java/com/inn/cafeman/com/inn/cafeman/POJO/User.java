@@ -7,6 +7,12 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 
+@NamedQuery(name = "User.findByEmailId", query = "select u from User u where u.email=:email")
+//
+@NamedQuery(name = "User.getAllUser",query = "select new com.inn.cafeman.com.inn.cafeman.wraper.UserWrapper(u.id,u.name,u.email,u.contactNumber, u.status) from User u where u.role='user'")
+
+@NamedQuery(name = "User.updateStatus", query = "update User u set u.status=:status where u.id=:id")
+
 @Data
 @Entity
 @DynamicInsert
