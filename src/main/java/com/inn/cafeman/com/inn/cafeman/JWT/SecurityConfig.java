@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurer;
+import org.springframework.security.web.util.matcher.R
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
@@ -46,7 +47,7 @@ public class SecurityConfig implements WebSecurityConfigurer{
     @Override
     protected void configure(HttpSecurity http) throws  Exception{
         http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
-                .and().csrf().disable().requestMatchers("/user/login", "/user/signup", "/user/forgotPassword")
+                .and().csrf().disable().antMatchers("/user/login", "/user/signup", "/user/forgotPassword")
                 .anyRequest().and().exceptionHandling().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     
